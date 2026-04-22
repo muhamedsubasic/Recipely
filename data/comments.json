@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1776844565522",
+    "recipeId": "1",
+    "author": "Someone",
+    "text": "woooooooooooooooow",
+    "parentId": null,
+    "createdAt": "2026-04-22T07:56:05.522Z"
+  },
+  {
+    "id": "1776844588345",
+    "recipeId": "1",
+    "author": "Hamlet223",
+    "text": "THIS IS AMAZING\n",
+    "parentId": null,
+    "createdAt": "2026-04-22T07:56:28.345Z"
+  },
+  {
+    "id": "1776844616128",
+    "recipeId": "2",
+    "author": "bLAAAAAAAASD",
+    "text": "azooooooooooooooooootakoksjjd",
+    "parentId": null,
+    "createdAt": "2026-04-22T07:56:56.128Z"
+  }
+]
