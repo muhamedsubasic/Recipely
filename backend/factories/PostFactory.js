@@ -5,7 +5,13 @@ class PostFactory {
   static createPost(type, data) {
     switch (type) {
       case 'recipe':
-        return new RecipePost(data.title, data.content, data.ingredients, data.category);
+        return new RecipePost(
+          data.title,
+          data.content,
+          data.ingredients,
+          data.category,
+          data.image || null
+        );
       case 'page':
         return new PagePost(data.title, data.content);
       default:

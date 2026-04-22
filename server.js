@@ -72,6 +72,7 @@ app.post('/api/recipes', (req, res) => {
       content: newRecipe.content,
       ingredients: newRecipe.ingredients || [],
       category: newRecipe.category,
+      image: newRecipe.image || null,
       createdAt: new Date().toISOString()
     };
     recipes.push(recipeObj);

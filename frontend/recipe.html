@@ -1,90 +1,139 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <title>Recipe</title>
-  <link rel="stylesheet" href="/style.css">
-</head>
-<body>
-  <div id="recipeDetail"></div>
-  <h3>Comments</h3>
-  <div id="commentsContainer"></div>
-  <form id="commentForm">
-    <input type="text" id="author" placeholder="Your name" required>
-    <textarea id="commentText" placeholder="Your comment" required></textarea>
-    <button type="submit">Add Comment</button>
-  </form>
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const recipeId = urlParams.get('id');
+  <head>
+    <title>Recipe</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div id="recipeDetail"></div>
 
-    async function loadRecipe() {
-      const res = await fetch(`/api/recipes/${recipeId}`);
-      const recipe = await res.json();
-      document.getElementById('recipeDetail').innerHTML = `
-        <h1>${recipe.title}</h1>
-        <p><strong>Category:</strong> ${recipe.category}</p>
-        <p>${recipe.content}</p>
-        <h4>Ingredients</h4><ul>${(recipe.ingredients || []).map(i => `<li>${i}</li>`).join('')}</ul>
-      `;
-    }
+    <h3>Comments</h3>
+    <div id="commentsContainer"></div>
 
-    // Composite pattern rendering: handles both single comment and replies uniformly
-    function renderCommentTree(comment, level = 0) {
-      let html = `<div class="comment" style="margin-left: ${level * 20}px">
-                    <strong>${escapeHtml(comment.author)}</strong>: ${escapeHtml(comment.text)}
+    <div class="comment-form-container">
+      <h4>Leave a comment</h4>
+      <form id="commentForm">
+        <div class="form-group">
+          <label for="author">Your name</label>
+          <input type="text" id="author" placeholder="Enter your name" required />
+        </div>
+        <div class="form-group">
+          <label for="commentText">Comment</label>
+          <textarea id="commentText" placeholder="Write your comment here..." rows="4" required></textarea>
+        </div>
+        <button type="submit" class="submit-btn">Post Comment</button>
+      </form>
+    </div>
+
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const recipeId = urlParams.get("id");
+
+      async function loadRecipe() {
+        const res = await fetch(`/api/recipes/${recipeId}`);
+        const recipe = await res.json();
+        document.getElementById("recipeDetail").innerHTML = `
+      <div class="recipe-header">
+        ${recipe.image ? `<img src="${recipe.image}" alt="${recipe.title}" class="recipe-detail-image" onerror="this.style.display='none'">` : ""}
+        <h1>${escapeHtml(recipe.title)}</h1>
+        <span class="recipe-category">${escapeHtml(recipe.category)}</span>
+      </div>
+      <div class="recipe-content">
+        <p>${escapeHtml(recipe.content)}</p>
+      </div>
+      <div class="recipe-ingredients">
+        <h4>Ingredients</h4>
+        <ul>${(recipe.ingredients || []).map((i) => `<li>${escapeHtml(i)}</li>`).join("")}</ul>
+      </div>
+    `;
+      }
+
+      // Composite pattern rendering: handles both single comment and replies uniformly
+      function renderCommentTree(comment, level = 0) {
+        let html = `<div class="comment" style="margin-left: ${level * 20}px">
+                    <div class="comment-author">${escapeHtml(comment.author)}</div>
+                    <div class="comment-text">${escapeHtml(comment.text)}</div>
                   </div>`;
-      if (comment.replies && comment.replies.length) {
-        for (let reply of comment.replies) {
-          html += renderCommentTree(reply, level + 1);
+        if (comment.replies && comment.replies.length) {
+          for (let reply of comment.replies) {
+            html += renderCommentTree(reply, level + 1);
+          }
+        }
+        return html;
+      }
+
+      function escapeHtml(str) {
+        if (!str) return "";
+        return str.replace(/[&<>]/g, function (m) {
+          if (m === "&") return "&amp;";
+          if (m === "<") return "&lt;";
+          if (m === ">") return "&gt;";
+          return m;
+        });
+      }
+
+      async function loadComments() {
+        const res = await fetch(`/api/comments/${recipeId}`);
+        const threads = await res.json();
+        const container = document.getElementById("commentsContainer");
+        if (!threads.length) {
+          container.innerHTML = '<p class="no-comments">No comments yet. Be the first!</p>';
+          return;
+        }
+        let allHtml = "";
+        for (let thread of threads) {
+          allHtml += renderCommentTree(thread, 0);
+        }
+        container.innerHTML = allHtml;
+      }
+
+      // Load saved username from localStorage if exists
+      const savedAuthor = localStorage.getItem("commentAuthor");
+      if (savedAuthor) {
+        document.getElementById("author").value = savedAuthor;
+      }
+
+      document.getElementById("commentForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const author = document.getElementById("author").value.trim();
+        const text = document.getElementById("commentText").value.trim();
+        if (!author || !text) {
+          alert("Please enter both your name and a comment.");
+          return;
+        }
+
+        // Save author name to localStorage
+        localStorage.setItem("commentAuthor", author);
+
+        const response = await fetch("/api/comments", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ recipeId, author, text, parentId: null }),
+        });
+        if (response.ok) {
+          document.getElementById("commentText").value = ""; // Clear only the comment text
+          loadComments(); // Reload comments
+        } else {
+          alert("Failed to add comment");
+        }
+      });
+
+      // Enter key submission: listen for keypress on both input fields
+      const authorInput = document.getElementById("author");
+      const commentTextarea = document.getElementById("commentText");
+
+      function handleEnterKey(e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          document.getElementById("commentForm").dispatchEvent(new Event("submit"));
         }
       }
-      return html;
-    }
 
-    function escapeHtml(str) {
-      if (!str) return '';
-      return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-      });
-    }
+      authorInput.addEventListener("keypress", handleEnterKey);
+      commentTextarea.addEventListener("keypress", handleEnterKey);
 
-    async function loadComments() {
-      const res = await fetch(`/api/comments/${recipeId}`);
-      const threads = await res.json();
-      const container = document.getElementById('commentsContainer');
-      if (!threads.length) {
-        container.innerHTML = '<p>No comments yet.</p>';
-        return;
-      }
-      let allHtml = '';
-      for (let thread of threads) {
-        allHtml += renderCommentTree(thread, 0);
-      }
-      container.innerHTML = allHtml;
-    }
-
-    document.getElementById('commentForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const author = document.getElementById('author').value;
-      const text = document.getElementById('commentText').value;
-      const response = await fetch('/api/comments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipeId, author, text, parentId: null })
-      });
-      if (response.ok) {
-        document.getElementById('commentText').value = '';
-        loadComments();
-      } else {
-        alert('Failed to add comment');
-      }
-    });
-
-    loadRecipe();
-    loadComments();
-  </script>
-</body>
+      loadRecipe();
+      loadComments();
+    </script>
+  </body>
 </html>

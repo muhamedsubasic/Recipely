@@ -3,15 +3,27 @@
     "id": "1",
     "title": "Classic Pancakes",
     "content": "Mix dry ingredients. Add milk and eggs. Cook on a hot griddle.",
-    "ingredients": ["flour", "milk", "eggs", "baking powder", "sugar"],
+    "ingredients": [
+      "flour",
+      "milk",
+      "eggs",
+      "baking powder",
+      "sugar"
+    ],
     "category": "breakfast",
+    "image": "https://picsum.photos/id/108/400/300",
     "createdAt": "2025-01-01T10:00:00.000Z"
   },
   {
     "id": "2",
     "title": "Caesar Salad",
     "content": "Toss romaine with dressing, croutons, and parmesan.",
-    "ingredients": ["romaine", "Caesar dressing", "croutons", "parmesan"],
+    "ingredients": [
+      "romaine",
+      "Caesar dressing",
+      "croutons",
+      "parmesan"
+    ],
     "category": "lunch",
     "createdAt": "2025-01-02T12:00:00.000Z"
   },
@@ -19,8 +31,38 @@
     "id": "3",
     "title": "Chocolate Brownies",
     "content": "Melt chocolate and butter. Mix with sugar, eggs, flour. Bake 25 min.",
-    "ingredients": ["chocolate", "butter", "sugar", "eggs", "flour"],
+    "ingredients": [
+      "chocolate",
+      "butter",
+      "sugar",
+      "eggs",
+      "flour"
+    ],
     "category": "dessert",
     "createdAt": "2025-01-03T15:00:00.000Z"
+  },
+  {
+    "id": "1776845507457",
+    "title": "wa",
+    "content": "waaaaaaaaaaa",
+    "ingredients": [
+      "we",
+      "we",
+      "we"
+    ],
+    "category": "dessert",
+    "createdAt": "2026-04-22T08:11:47.457Z"
+  },
+  {
+    "id": "1776845641153",
+    "title": "skdadasdsda",
+    "content": "sadsdsadsad",
+    "ingredients": [
+      "wa",
+      "wa",
+      "wa"
+    ],
+    "category": "dessert",
+    "createdAt": "2026-04-22T08:14:01.153Z"
   }
 ]
