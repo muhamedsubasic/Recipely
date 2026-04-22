@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Recipe</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="recipeDetail"></div>
+  <h3>Comments</h3>
+  <div id="commentsContainer"></div>
+  <form id="commentForm">
+    <input type="text" id="author" placeholder="Your name" required>
+    <textarea id="commentText" placeholder="Your comment" required></textarea>
+    <input type="hidden" id="parentId" value="">
+    <button type="submit">Add Comment</button>
+  </form>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const recipeId = urlParams.get('id');
+
+    async function loadRecipe() {
+      const res = await fetch(`/api/recipes/${recipeId}`);
+      const recipe = await res.json();
+      document.getElementById('recipeDetail').innerHTML = `
+        <h1>${recipe.title}</h1>
+        <p><strong>Category:</strong> ${recipe.category}</p>
+        <p>${recipe.content}</p>
+        <h4>Ingredients</h4><ul>${recipe.ingredients.map(i => `<li>${i}</li>`).join('')}</ul>
+      `;
+    }
+
+    async function loadComments() {
+      const res = await fetch(`/api/comments/${recipeId}`);
+      const threads = await res.json();
+      // Recursively render using Composite pattern (frontend mirror)
+      function renderCommentTree(commentNode) {
+        return `
+          <div class="comment">
+            <strong>${commentNode.author}</strong>: ${commentNode.text}
+            ${commentNode.replies && commentNode.replies.length ? 
+              `<div class="replies">${commentNode.replies.map(r => renderCommentTree(r)).join('')}</div>` : ''}
+            <button class="replyBtn" data-parent="${commentNode.id}">Reply</button>
+          </div>
+        `;
+      }
+      const html = threads.map(t => renderCommentTree(t)).join('');
+      document.getElementById('commentsContainer').innerHTML = html || '<p>No comments yet.</p>';
+      // Attach reply handlers
+      document.querySelectorAll('.replyBtn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.getElementById('parentId').value = btn.dataset.parent;
+          document.getElementById('commentForm').scrollIntoView();
+        });
+      });
+    }
+
+    document.getElementById('commentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const author = document.getElementById('author').value;
+      const text = document.getElementById('commentText').value;
+      const parentId = document.getElementById('parentId').value;
+      await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipeId, author, text, parentId: parentId || null })
+      });
+      document.getElementById('parentId').value = '';
+      document.getElementById('commentText').value = '';
+      loadComments();
+    });
+
+    loadRecipe();
+    loadComments();
+  </script>
+</body>
+</html>

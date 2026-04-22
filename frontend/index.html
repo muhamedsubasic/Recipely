@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Recipe Blog</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <h1>Recipes</h1>
+  <div>
+    <label>Filter by category:</label>
+    <select id="categoryFilter">
+      <option value="">All</option>
+      <option value="breakfast">Breakfast</option>
+      <option value="lunch">Lunch</option>
+      <option value="dessert">Dessert</option>
+    </select>
+    <button id="applyFilter">Apply</button>
+  </div>
+  <div id="recipesList"></div>
+  <script>
+    async function loadRecipes() {
+      const category = document.getElementById('categoryFilter').value;
+      let url = '/api/recipes';
+      if (category) url += `?filterBy=category&value=${category}`;
+      const res = await fetch(url);
+      const recipes = await res.json();
+      const container = document.getElementById('recipesList');
+      container.innerHTML = recipes.map(r => `
+        <div class="recipe-card">
+          <h3><a href="/recipe.html?id=${r.id}">${r.title}</a></h3>
+          <p>Category: ${r.category}</p>
+          <p>${r.content.substring(0, 100)}...</p>
+        </div>
+      `).join('');
+    }
+    document.getElementById('applyFilter').addEventListener('click', loadRecipes);
+    loadRecipes();
+  </script>
+</body>
+</html>
