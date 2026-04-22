@@ -1,10 +1,10 @@
 "I analyzed WordPress in Labs 5–7 (category:  Content Management / Blogging Platform). I am building Recipe Blog with Categories, which belongs to the same category.
 
+# Recipely — A Better WordPress‑Inspired Recipe Blog
+
 # Live: https://recipely-l7h2.onrender.com/
 
-# 🍽️ Recipe Blog – A Better WordPress‑Inspired CMS
-
-> A mini recipe blog that demonstrates **three design patterns** (Factory Method, Composite, Strategy) to fix architectural weaknesses found in real CMSs like WordPress.
+A mini recipe blog that demonstrates three design patterns (Factory Method, Composite, Strategy) to address architectural weaknesses commonly found in CMSs like WordPress.
 
 ## 📋 Table of Contents
 
@@ -16,55 +16,98 @@
 - [Patterns Applied](#patterns-applied)
 - [Project Structure](#project-structure)
 - [API Endpoints](#api-endpoints)
-- [Screenshots](#screenshots)
 - [What Makes This Better Than WordPress?](#what-makes-this-better-than-wordpress)
 
 ---
 
 ## Overview
 
-This project is a **recipe blog** where users can:
-- Browse recipes filtered by category (breakfast, lunch, dessert)
-- View a single recipe with its ingredients and instructions
-- Leave comments (with a clean UI, username persistence, and Enter‑to‑submit)
-- Administrators can create, edit, and delete recipes via a password‑protected panel
-
-The code intentionally applies **design patterns** that are **missing or poorly implemented** in real CMSs (e.g., WordPress) to show how small architectural choices improve maintainability, testability, and extensibility.
+`Recipely` is a compact recipe blog where users can browse recipes by category, view individual recipes with ingredients and instructions, and post comments. An admin panel (password: `admin123`) allows basic CRUD for recipes. The project intentionally applies design patterns to show how small architectural choices improve maintainability and extensibility.
 
 ---
 
 ## Features
 
-✅ **Recipes** – Create, read, update, delete  
-✅ **Categories** – Breakfast, lunch, dessert  
-✅ **Comments** – Flat for now (Composite pattern ready for threading)  
-✅ **Admin panel** – Password‑protected form (`admin123`)  
-✅ **Image support** – Optional image URL per recipe  
-✅ **Responsive grid layout** – Recipes display as cards with images  
-✅ **Filter by category** – Strategy pattern in action  
-✅ **Username persistence** – Saves commenter’s name in `localStorage`  
-✅ **Enter key submission** – Press Enter to post a comment  
+- Recipes: Create, read, update, delete
+- Categories: Breakfast, Lunch, Dessert
+- Comments: Flat now, Composite ready for threaded replies
+- Admin panel: Password-protected (`admin123`)
+- Image support: Optional image URL per recipe
+- Responsive grid layout and recipe cards
+- Category filtering using Strategy pattern
+- Username persistence via `localStorage`
 
 ---
 
 ## Tech Stack
 
-| Layer       | Technology                          |
-|-------------|-------------------------------------|
-| Backend     | Node.js + Express                   |
-| Persistence | JSON files (`data/recipes.json`, `data/comments.json`) |
-| Frontend    | Plain HTML, CSS, Vanilla JS         |
-| Styling     | Custom CSS (grid, cards, shadows)   |
-| Patterns    | Factory Method, Composite, Strategy |
-
-> No database setup required – just run the server.
+- Backend: Node.js + Express
+- Persistence: JSON files (`data/recipes.json`)
+- Frontend: Plain HTML, CSS, Vanilla JS
+- Patterns: Factory Method, Composite, Strategy
 
 ---
 
 ## Setup & Run
 
-1. **Clone or download** the project into a folder.
-2. **Install dependencies** (only Express):
-   ```bash
-   npm install express
-   ```
+1. Install dependencies:
+
+```bash
+npm install express
+```
+
+2. Run the server:
+
+```bash
+node server.js
+```
+
+The app serves static files from `frontend/` and reads/writes JSON in `data/`.
+
+---
+
+## How to Use
+
+- Browse recipes on the home page and filter by category.
+- Click a recipe to view details and comments.
+- Leave a comment (username is saved in `localStorage`).
+- Admin: open `admin.html`, enter password `admin123` to add or edit recipes.
+
+---
+
+## Patterns Applied
+
+- Creational — Factory Method: `backend/factories/PostFactory.js` centralizes post creation (e.g., `RecipePost`, `PagePost`).
+- Structural — Composite: `backend/models/CommentComponent.js` models comments and threads with a uniform interface.
+- Behavioral — Strategy: `backend/filters/FilterStrategy.js` and concrete filter classes encapsulate filtering logic.
+
+---
+
+## Project Structure
+
+- `server.js` — Express server and routes
+- `backend/factories/PostFactory.js` — Factory for post types
+- `backend/models/RecipePost.js`, `backend/models/PagePost.js` — Post models
+- `backend/models/CommentComponent.js` — Composite for comments
+- `backend/filters/FilterStrategy.js` — Filter strategy implementations
+- `frontend/` — `index.html`, `recipe.html`, `admin.html`, `style.css`
+- `data/recipes.json` — Seeded recipes data
+
+---
+
+## API Endpoints
+
+- GET `/api/recipes` — list recipes (supports category filters)
+- GET `/api/recipes/:id` — single recipe
+- POST `/api/recipes` — create (admin)
+- PUT `/api/recipes/:id` — update (admin)
+- DELETE `/api/recipes/:id` — delete (admin)
+- POST `/api/recipes/:id/comments` — add comment
+
+---
+
+## What Makes This Better Than WordPress?
+
+- Focused architecture: small, testable components instead of monolithic functions.
+- Clear separation of concerns: factories, composites, and strategies make extension safer and cheaper.
+- JSON-based persistence keeps the demo simple while the patterns remain applicable to real DBs.
