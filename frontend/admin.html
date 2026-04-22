@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Recipe Blog</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <h1>Admin Panel</h1>
+  <input type="password" id="adminPass" placeholder="Password">
+  <button id="loginBtn">Login</button>
+  <div id="adminContent" style="display:none;">
+    <h2>Create New Recipe</h2>
+    <form id="recipeForm">
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="title" placeholder="Recipe title" required>
+      </div>
+      <div class="form-group">
+        <label>Content / Instructions</label>
+        <textarea id="content" placeholder="Describe how to make it..." required></textarea>
+      </div>
+      <div class="form-group">
+        <label>Ingredients (comma separated)</label>
+        <input type="text" id="ingredients" placeholder="flour, eggs, milk">
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="category">
+          <option value="breakfast">Breakfast</option>
+          <option value="lunch">Lunch</option>
+          <option value="dessert">Dessert</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Image URL (optional)</label>
+        <input type="text" id="image" placeholder="https://example.com/food.jpg">
+      </div>
+      <button type="submit" class="submit-btn">Create Recipe</button>
+    </form>
+    <div id="recipesList"></div>
+  </div>
+  <script>
+    const PASSWORD = 'admin123';
+    document.getElementById('loginBtn').onclick = () => {
+      if (document.getElementById('adminPass').value === PASSWORD) {
+        document.getElementById('adminContent').style.display = 'block';
+        loadRecipesForAdmin();
+      } else alert('Wrong password');
+    };
+    async function loadRecipesForAdmin() {
+      const res = await fetch('/api/recipes');
+      const recipes = await res.json();
+      const container = document.getElementById('recipesList');
+      container.innerHTML = '<h3>Existing Recipes</h3>' + recipes.map(r => `
+        <div class="admin-recipe-item">
+          <strong>${r.title}</strong>
+          <button onclick="deleteRecipe('${r.id}')">Delete</button>
+        </div>
+      `).join('');
+    }
+    async function deleteRecipe(id) {
+      await fetch(`/api/recipes/${id}`, { method: 'DELETE' });
+      loadRecipesForAdmin();
+    }
+    document.getElementById('recipeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const ingredients = document.getElementById('ingredients').value.split(',').map(i => i.trim());
+      const image = document.getElementById('image').value.trim() || null;
+      await fetch('/api/recipes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: document.getElementById('title').value,
+          content: document.getElementById('content').value,
+          ingredients,
+          category: document.getElementById('category').value,
+          image
+        })
+      });
+      alert('Recipe created');
+      loadRecipesForAdmin();
+      document.getElementById('recipeForm').reset();
+    });
+  </script>
+</body>
+</html>
